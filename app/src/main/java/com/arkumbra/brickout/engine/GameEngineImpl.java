@@ -78,7 +78,7 @@ public class GameEngineImpl implements GameEngine {
 
     // temp
     private int levelCount = 0;
-    private String[] levels = new String[]{"level3", "level6", "level1", "level2", "level4", "level4", "level7", "level8"};
+    private String[] levels = new String[]{"level1", "level2", "level4", "level3", "level5", "level6", "level7", "level8"};
 
     // Lock this so only activity can activate?
     @Override
@@ -88,25 +88,7 @@ public class GameEngineImpl implements GameEngine {
         }
 
         loadLevel("world1/" + levels[levelCount] + ".brk");
-
-        // ----------
-
-//        loadLevel("world1/level4.brk");
-
-        // -----------
-//        Random r = new Random();
-//        int levelNum = r.nextInt(6) + 1;
-//        loadLevel("level" + levelNum + ".brk");
     }
-
-
-//    @Override
-//    public boolean touch(float x, float y, TouchEventType touchEventType) {
-//        this.xPress = x;
-//        this.yPress = y;
-//
-//
-//    }
 
     @Override
     public boolean isInitialisedYet() {
@@ -136,8 +118,8 @@ public class GameEngineImpl implements GameEngine {
         }
     }
 
+    // TODO move
     private Paint pausePainter = new Paint();
-    private Paint pauseOutlinePainter = new Paint();
 
     // TODO double buffer
     @Override
@@ -158,10 +140,6 @@ public class GameEngineImpl implements GameEngine {
         pausePainter.setTextSize(surfaceDimensions.getWidthPixels() / 10);
         pausePainter.setTextAlign(Paint.Align.CENTER);
 
-//        pauseOutlinePainter.setColor(Color.WHITE);
-//        pauseOutlinePainter.setTypeface(FontUtils.getAppTypeface());
-//        pauseOutlinePainter.setTextSize(surfaceDimensions.getWidthPixels() / 9.7f);
-//        pauseOutlinePainter.setTextAlign(Paint.Align.CENTER);
 
 
         if (gameState == GameState.PAUSE) {
@@ -177,10 +155,6 @@ public class GameEngineImpl implements GameEngine {
     }
 
     private void drawTextInMiddleOfScreen(Canvas canvas, String text) {
-//        canvas.drawText(text, surfaceDimensions.getWidthPixels() / 2,
-//                surfaceDimensions.getHeightPixels() / 2,
-//                pauseOutlinePainter);
-
         canvas.drawText(text, surfaceDimensions.getWidthPixels() / 2,
                 surfaceDimensions.getHeightPixels() / 2,
                 pausePainter);
