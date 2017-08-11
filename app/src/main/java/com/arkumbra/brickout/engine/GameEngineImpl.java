@@ -4,14 +4,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.view.MotionEvent;
 
 import com.arkumbra.brickout.engine.entity.GameDrawable;
 import com.arkumbra.brickout.engine.level.Level;
-import com.arkumbra.brickout.engine.entity.BrickType;
 import com.arkumbra.brickout.engine.entity.GameEntity;
-import com.arkumbra.brickout.engine.entity.StandardBrick;
 import com.arkumbra.brickout.engine.level.LevelFileLoader;
 import com.arkumbra.brickout.engine.level.LevelProgress;
 import com.arkumbra.brickout.engine.level.LoadingFileDetails;
@@ -22,7 +19,6 @@ import com.arkumbra.brickout.view.SurfaceDimensions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by lukegardener on 2017/07/28.
@@ -35,6 +31,8 @@ public class GameEngineImpl implements GameEngine {
     private static final LevelFileLoader levelFileLoader = new LevelFileLoader();
 
     private SurfaceDimensions surfaceDimensions;
+
+    private GameState gameState = GameState.UNPAUSE;
 
     private static final int MILLISECONDS_FOR_GAME_OVER_OR_CLEAR = 4 * 1000;
     private boolean initialised;
@@ -71,14 +69,16 @@ public class GameEngineImpl implements GameEngine {
     @Override
     public void initialise(int canvasWidth, int canvasHeight) {
         this.surfaceDimensions = new SurfaceDimensions(canvasWidth, canvasHeight);
-        controlsUI = new ControlsUI(context, this, 0, canvasHeight - 120, canvasWidth, canvasHeight);
+
+        //controlsUI = new ControlsUI(context, this, 0, canvasHeight - 120, canvasWidth, canvasHeight);
+        controlsUI = new ControlsUI(context, this, canvasWidth, canvasHeight);
 
         this.initialised = true;
     }
 
     // temp
     private int levelCount = 0;
-    private String[] levels = new String[]{"levelEasy", "level_cat", "level0-1", "level0-2", "level1"};
+    private String[] levels = new String[]{"level3", "level6", "level1", "level2", "level4", "level4", "level7", "level8"};
 
     // Lock this so only activity can activate?
     @Override
@@ -91,7 +91,7 @@ public class GameEngineImpl implements GameEngine {
 
         // ----------
 
-//        loadLevel("world1/level1.brk");
+//        loadLevel("world1/level4.brk");
 
         // -----------
 //        Random r = new Random();
@@ -119,6 +119,10 @@ public class GameEngineImpl implements GameEngine {
             return;
         }
 
+        if (gameState == GameState.PAUSE) {
+            return;
+        }
+
         this.pauseMsRemaining -= msDelta;
         if ((gameOver || levelClear) && pauseMsRemaining < 0) {
             this.gameOver = false;
@@ -133,6 +137,7 @@ public class GameEngineImpl implements GameEngine {
     }
 
     private Paint pausePainter = new Paint();
+    private Paint pauseOutlinePainter = new Paint();
 
     // TODO double buffer
     @Override
@@ -148,20 +153,37 @@ public class GameEngineImpl implements GameEngine {
         controlsUI.draw(canvas);
 
         // TODO TEMP
-        pausePainter.setColor(Color.RED);
+        pausePainter.setColor(Color.WHITE);
         pausePainter.setTypeface(FontUtils.getAppTypeface());
         pausePainter.setTextSize(surfaceDimensions.getWidthPixels() / 10);
         pausePainter.setTextAlign(Paint.Align.CENTER);
 
-        if (gameOver) {
-            canvas.drawText("GAME OVER", surfaceDimensions.getWidthPixels() / 2,
-                                    surfaceDimensions.getHeightPixels() / 2,
-                                    pausePainter);
-        } else if (levelClear) {
-            canvas.drawText("LEVEL CLEAR!", surfaceDimensions.getWidthPixels() / 2,
-                    surfaceDimensions.getHeightPixels() / 2,
-                    pausePainter);
+//        pauseOutlinePainter.setColor(Color.WHITE);
+//        pauseOutlinePainter.setTypeface(FontUtils.getAppTypeface());
+//        pauseOutlinePainter.setTextSize(surfaceDimensions.getWidthPixels() / 9.7f);
+//        pauseOutlinePainter.setTextAlign(Paint.Align.CENTER);
+
+
+        if (gameState == GameState.PAUSE) {
+            drawTextInMiddleOfScreen(canvas, "PAUSE");
         }
+
+        if (gameOver) {
+            drawTextInMiddleOfScreen(canvas, "GAME OVER");
+        } else if (levelClear) {
+            drawTextInMiddleOfScreen(canvas, "LEVEL CLEAR!");
+
+        }
+    }
+
+    private void drawTextInMiddleOfScreen(Canvas canvas, String text) {
+//        canvas.drawText(text, surfaceDimensions.getWidthPixels() / 2,
+//                surfaceDimensions.getHeightPixels() / 2,
+//                pauseOutlinePainter);
+
+        canvas.drawText(text, surfaceDimensions.getWidthPixels() / 2,
+                surfaceDimensions.getHeightPixels() / 2,
+                pausePainter);
     }
 
     @Override
@@ -211,13 +233,22 @@ public class GameEngineImpl implements GameEngine {
     public boolean onTouchEvent(MotionEvent motionEvent) {
         this.xPress = motionEvent.getRawX();
         this.yPress = motionEvent.getRawY();
-        TouchEventType touchEventType = convertTouchEventType(motionEvent);
 
-        if (currentLevel != null) {
-            return currentLevel.touch(xPress, yPress, touchEventType);
+        // TODO needed?
+        if (currentLevel == null) {
+            return false;
         }
 
-        return true;
+        if (controlsUI.onTouchEvent(motionEvent)) {
+            return true;
+        }
+
+        TouchEventType touchEventType = convertTouchEventType(motionEvent);
+        if (currentLevel.touch(xPress, yPress, touchEventType)) {
+            return true;
+        }
+
+        return false;
     }
 
     private TouchEventType convertTouchEventType(MotionEvent motionEvent) {
@@ -232,4 +263,14 @@ public class GameEngineImpl implements GameEngine {
 
     }
 
+    @Override
+    public void onStateChange(GameState gameState) {
+        this.gameState = gameState;
+
+        // TODO other set up, timers etc
+    }
+
+    public Context getContext() {
+        return context;
+    }
 }

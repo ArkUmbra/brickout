@@ -1,8 +1,10 @@
 package com.arkumbra.brickout.engine.entity;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.arkumbra.brickout.engine.collision.AABB;
+import com.arkumbra.brickout.engine.collision.Direction;
 
 /**
  * Created by lukegardener on 2017/07/29.
@@ -23,8 +25,11 @@ public class PlayerBat implements GameEntity, CollisionBox{
     private float velocityThisTick;
     private boolean moveOnUpdate;
 
-    public PlayerBat(Position pos) {
+    private float canvasWidthPixels;
+
+    public PlayerBat(Position pos, float canvasWidthPixels) {
         this.pos = pos;
+        this.canvasWidthPixels = canvasWidthPixels;
 
         updateAlisAlignedBoundingBox();
     }
@@ -84,12 +89,21 @@ public class PlayerBat implements GameEntity, CollisionBox{
     }
 
     public void proceedToDestination(float xUnitPosition) {
-        if (touchPositionIsOverPlayerBat(xUnitPosition))
-            return;
+        Log.d(LOG_TAG, "tap pos " + xUnitPosition);
+        Log.d(LOG_TAG, "canvas unit width " + canvasWidthPixels);
 
-        xUnitPosition = calculateIntendedPositionByAccountingForBatSize(xUnitPosition);
+        if (xUnitPosition >= canvasWidthPixels / 2f) {
+            this.nextXPosToMoveTowards = canvasWidthPixels;
+        } else {
+            this.nextXPosToMoveTowards = 0;
+        }
 
-        this.nextXPosToMoveTowards = xUnitPosition;
+//        if (touchPositionIsOverPlayerBat(xUnitPosition))
+//            return;
+//
+        this.nextXPosToMoveTowards = calculateIntendedPositionByAccountingForBatSize(nextXPosToMoveTowards);
+
+//        this.nextXPosToMoveTowards = xUnitPosition;
         this.moveOnUpdate = true;
     }
 
@@ -123,5 +137,15 @@ public class PlayerBat implements GameEntity, CollisionBox{
 
     public float getVelocityThisTick() {
         return velocityThisTick;
+    }
+
+    public Direction getDirectionOfBatMovement() {
+        if (this.velocityThisTick == 0) {
+            return Direction.NONE;
+        } else if (targetToTheRightOfCurrentPosition(this.nextXPosToMoveTowards)) {
+            return Direction.RIGHT;
+        } else {
+            return Direction.LEFT;
+        }
     }
 }

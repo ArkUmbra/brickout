@@ -14,7 +14,7 @@ public interface CollisionEngine {
 
     boolean isOverlapping(AABB aabb1, AABB aabb2);
     Axis givenOverlapWhichAxisShouldBallBounceOn(AABB brick, AABB ball);
-    void moveBallSlightlySoNoLongerCollides(Ball ball, AABB collidingEntity, Axis bounceAxis);
+    void moveBallSlightlySoNoLongerCollides(Ball ball, AABB collidingEntity, Axis axis);
     void alterSpeedAndAngleOfBallBasedOnSpeedBatHitsBall(Ball ball, PlayerBat playerBat);
 
 }

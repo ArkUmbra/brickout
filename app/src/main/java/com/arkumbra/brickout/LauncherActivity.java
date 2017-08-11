@@ -48,13 +48,6 @@ public class LauncherActivity extends Activity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        Log.d(LOG_TAG, "Touch motion event");
-        // TODO handle response
-//        touchEventController.onTouchEvent(event);
-        return gameEngine.onTouchEvent(event);
-    }
 
     @Override
     public void onPause() {
@@ -62,10 +55,19 @@ public class LauncherActivity extends Activity {
         // Handle this if required
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
         // Handle this if required
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.d(LOG_TAG, "Touch motion event");
+        // TODO handle response
+//        touchEventController.onTouchEvent(event);
+        return gameEngine.onTouchEvent(event);
     }
 
 

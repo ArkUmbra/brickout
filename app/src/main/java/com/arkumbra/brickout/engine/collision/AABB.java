@@ -32,4 +32,12 @@ public class AABB {
     public float getMaxY() {
         return max.getY();
     }
+
+    public float getXMidpoint() {
+        return min.getX() + ((max.getX() - min.getX()) / 2f);
+    }
+
+    public float getYMidpoint() {
+        return min.getY() + ((max.getY() - min.getY()) / 2f);
+    }
 }

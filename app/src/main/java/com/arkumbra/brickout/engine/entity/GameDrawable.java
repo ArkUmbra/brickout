@@ -9,4 +9,5 @@ import android.graphics.Canvas;
 public interface GameDrawable {
 
     void draw(Canvas canvas);
+
 }

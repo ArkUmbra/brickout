@@ -1,16 +1,18 @@
 package com.arkumbra.brickout.engine;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 
 import com.arkumbra.brickout.engine.level.LevelProgress;
+import com.arkumbra.brickout.engine.touch.MotionEventHandler;
 import com.arkumbra.brickout.engine.touch.TouchEventHandler;
 
 /**
  * Created by lukegardener on 2017/07/27.
  */
 
-public interface GameEngine {
+public interface GameEngine extends MotionEventHandler, LevelStateHandler {
 
     void initialise(int canvasWidth, int canvasHeight);
     boolean isInitialisedYet();
@@ -27,6 +29,6 @@ public interface GameEngine {
 
     int getScore();
 
+    Context getContext();
 
-    boolean onTouchEvent(MotionEvent motionEvent);
 }

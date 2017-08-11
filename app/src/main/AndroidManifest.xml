@@ -13,6 +13,7 @@
             android:name="com.arkumbra.brickout.LauncherActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
+            android:launchMode="singleInstance"
             android:label="@string/app_name"
             android:theme="@style/FullscreenTheme">
             <intent-filter>

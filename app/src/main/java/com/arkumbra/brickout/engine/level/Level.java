@@ -40,7 +40,10 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
 
     private GameEngine gameEngine;
     private CollisionEngine collisionEngine = new CollisionEngineImpl();
+
     private List<Brick> bricks;
+    private List<Brick> destructableBricks;
+
     private PlayerBat playerBat;
     private Ball ball;
     private int score = 0;
@@ -55,16 +58,29 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
         this.LEVEL_X_DIMENSION_UNITS = levelWidthUnits;
         this.LEVEL_Y_DIMENSION_UNITS = levelHeightUnits;
         this.bricks = bricks;
+        this.destructableBricks = filterDestructableBricks(bricks);
 
         UNIT_WIDTH_PIXELS = surfaceDimensions.getWidthPixels() / LEVEL_X_DIMENSION_UNITS;
         UNIT_HEIGHT_PIXELS = surfaceDimensions.getHeightPixels() / LEVEL_Y_DIMENSION_UNITS;
 
         Position batStartPosition = new Position(LEVEL_X_DIMENSION_UNITS / 2, LEVEL_Y_DIMENSION_UNITS - 5);
-        playerBat = new PlayerBat(batStartPosition);
+        playerBat = new PlayerBat(batStartPosition, LEVEL_X_DIMENSION_UNITS);
 
         // Put ball above bat
         Position ballStartPosition = batStartPosition.getNewPositionWithOffset(2, -1);
         ball = new Ball(ballStartPosition, new UnitSize(LEVEL_X_DIMENSION_UNITS, LEVEL_Y_DIMENSION_UNITS));
+    }
+
+    private List<Brick> filterDestructableBricks(List<Brick> allBricks) {
+        List<Brick> destructableBricks = new ArrayList<Brick>();
+
+        for (Brick brick: allBricks) {
+            if (brick.isBreakable()) {
+                destructableBricks.add(brick);
+            }
+        }
+
+        return destructableBricks;
     }
 
 
@@ -119,7 +135,7 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
             return;
         }
 
-        if (bricks.isEmpty()) {
+        if (destructableBricks.isEmpty()) {
             gameEngine.notifyLevelProgress(LevelProgress.CLEARED);
             return;
         }
@@ -141,10 +157,13 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
 
         for (Brick brick : bricks) {
             if (collisionEngine.isOverlapping(brick.getAABB(), ball.getAABB())) {
-                this.score = score + 1;
 
-                if (brick.hit(1)) {
-                    destroyedBricks.add(brick);
+                if (brick.isBreakable()) {
+                    this.score = score + 1;
+
+                    if (brick.hit(1)) {
+                        destroyedBricks.add(brick);
+                    }
                 }
 
                 // TODO FIXME not always bouncing at right angle
@@ -160,13 +179,14 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
         }
 
         bricks.removeAll(destroyedBricks);
+        destructableBricks.removeAll(destroyedBricks);
     }
 
     private void checkBatCollisionAgainstBall() {
         if (collisionEngine.isOverlapping(playerBat.getAABB(), ball.getAABB())) {
             Axis bounceAxis = collisionEngine.
                     givenOverlapWhichAxisShouldBallBounceOn(playerBat.getAABB(), ball.getAABB());
-            ball.bounce(bounceAxis);
+//            ball.bounce(bounceAxis);
 
             collisionEngine.alterSpeedAndAngleOfBallBasedOnSpeedBatHitsBall(ball, playerBat);
 
@@ -176,11 +196,14 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
     }
 
     @Override
-    public boolean touch(float xPixel, float y, TouchEventType touchEventType) {
+    public boolean touch(float xPixel, float yPixel, TouchEventType touchEventType) {
         Log.d(LOG_TAG, "Touching at x " + xPixel);
 
         if (! ball.hasLaunched()) {
-            ball.launch();
+            Position positionToLaunchTowards = new Position(xPixel / UNIT_WIDTH_PIXELS,
+                    yPixel / UNIT_HEIGHT_PIXELS);
+
+            ball.launch(positionToLaunchTowards);
             return true;
         }
 

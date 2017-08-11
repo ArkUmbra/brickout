@@ -17,12 +17,14 @@ public class StandardBrick implements Brick {
     private AABB axisAlignedBoundingBox;
     private boolean isDestroyed;
     private int hp;
+    private boolean breakable;
 
     public StandardBrick(BrickType brickType, Position topLeftPositionInUnits) {
         this.brickType = brickType;
         this.topLeftPositionInUnits = topLeftPositionInUnits;
         this.axisAlignedBoundingBox = createBoundingBox();
         this.hp = brickType.getHitsToBreak();
+        this.breakable = brickType.isBreakable();
     }
 
     private AABB createBoundingBox() {
@@ -36,10 +38,9 @@ public class StandardBrick implements Brick {
         return isDestroyed;
     }
 
-    // TODO actually required?
     @Override
     public boolean isBreakable() {
-        return true;
+        return breakable;
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.arkumbra.brickout.engine.collision.AABB;
 import com.arkumbra.brickout.engine.collision.Axis;
+import com.arkumbra.brickout.engine.collision.Direction;
 import com.arkumbra.brickout.engine.entity.Ball;
 import com.arkumbra.brickout.engine.entity.CollisionBox;
 import com.arkumbra.brickout.engine.entity.PlayerBat;
@@ -17,6 +18,7 @@ public class CollisionEngineImpl implements CollisionEngine {
     private static final String LOG_TAG = "CollisionEngine";
 
     private static final float REBOUND_OFFSET = 0.05f;
+
 
     @Override
     public boolean isOverlapping(AABB a, AABB b) {
@@ -70,6 +72,9 @@ public class CollisionEngineImpl implements CollisionEngine {
     public void moveBallSlightlySoNoLongerCollides(Ball ball, AABB collidingEntity, Axis bounceAxis) {
         Position ballPos = ball.getCentrePointPosition();
 
+
+        // TODO FIX
+
         if (bounceAxis.isX()) {
             // Ball to the right -- any of the ball is outside
             if (ballPos.getX() + ball.getRadius() > collidingEntity.getMaxX()) {
@@ -92,22 +97,49 @@ public class CollisionEngineImpl implements CollisionEngine {
 
     private static final double MAX_DEFLECT_ANGLE_DEGREES = 88d;
     private double degreesPerRadian = 180 / Math.PI;
+
     @Override
     public void alterSpeedAndAngleOfBallBasedOnSpeedBatHitsBall(Ball ball, PlayerBat playerBat) {
-//        if (playerBat.getVelocityThisTick() == 0.0f) {
-//            return;
+//
+        // TODO is this faster to do via tan (toh), then sub 180 - 90 - theta?
+        // cosh = adj / hyp
+
+
+        // FIXME Always at max speed, though?????? Either should accelerate, or calculate angle
+        // FIXME based on initial ball angle or...
+//        float fractionOfMaxSpeed = Math.abs(playerBat.getVelocityThisTick() /
+//                    PlayerBat.MAX_MOVE_UNIT_AMOUNT_PER_SECOND);
+//
+
+        // bounce the ball, then adjust the angle slightly
+
+        ball.bounce(Axis.Y);
+
+        Direction batDirection = playerBat.getDirectionOfBatMovement();
+        if (batDirection.isNone()) {
+            return;
+        } else if (batDirection.isLeft()) {
+            ball.appendDeflectionAngleDueToBatWithinCertainRange(18);
+        } else {
+            ball.appendDeflectionAngleDueToBatWithinCertainRange(-18);
+        }
+
+
+//        if (batMovingLeft(playerBat) && ballMovingLeft(ball)) {
+//            angleDegreesToAdd = 20;
+//        } else if (batMovingLeft(playerBat) && !ballMovingLeft(ball)) {
+//            angleDegreesToAdd = 20;
+//        } else if (!batMovingLeft(playerBat) && ballMovingLeft(ball)) {
+//            angleDegreesToAdd
+//        } else if (!batMovingLeft(playerBat) && !ballMovingLeft(ball)) {
+//
+//        } else {
+//            Log.d(LOG_TAG, "This should not occur. Resulting angle unchanged");
 //        }
-//
-//        // TODO is this faster to do via tan (toh), then sub 180 - 90 - theta?
-//        // cosh = adj / hyp
-//
-//        double nonAlteredReboundAngle = Math.cosh(ball.getxSpeed() /
-//                            Math.hypot(ball.getxSpeed(), ball.getySpeed()));
-//
-//        Log.d(LOG_TAG, "Impact angle " + nonAlteredReboundAngle*degreesPerRadian);
-//
-//
-//        float fractionOfMaxSpeed = playerBat.getVelocityThisTick() / PlayerBat.MAX_MOVE_UNIT_AMOUNT_PER_SECOND;
     }
+
+//    private boolean ballMovingLeft(Ball ball) {
+//
+//    }
 
 }
