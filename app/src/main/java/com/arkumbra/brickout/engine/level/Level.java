@@ -9,6 +9,8 @@ import com.arkumbra.brickout.engine.CollisionEngine;
 import com.arkumbra.brickout.engine.CollisionEngineImpl;
 import com.arkumbra.brickout.engine.GameEngine;
 import com.arkumbra.brickout.engine.collision.Axis;
+import com.arkumbra.brickout.engine.collision.CollisionListener;
+import com.arkumbra.brickout.engine.collision.CollisionObserver;
 import com.arkumbra.brickout.engine.entity.Ball;
 import com.arkumbra.brickout.engine.entity.GameDrawable;
 import com.arkumbra.brickout.engine.entity.Brick;
@@ -22,13 +24,15 @@ import com.arkumbra.brickout.engine.touch.TouchEventType;
 import com.arkumbra.brickout.view.SurfaceDimensions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by lukegardener on 2017/07/29.
  */
 
-public class Level implements GameDrawable, GameEntity, TouchEventHandler {
+public class Level implements GameDrawable, GameEntity, TouchEventHandler, CollisionObserver {
     private static final String LOG_TAG = "Level";
 
     private static final Paint paint = new Paint();
@@ -40,6 +44,7 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
 
     private GameEngine gameEngine;
     private CollisionEngine collisionEngine = new CollisionEngineImpl();
+    private Set<CollisionListener> collisionListeners = new HashSet<>();
 
     private List<Brick> bricks;
     private List<Brick> destructableBricks;
@@ -162,7 +167,10 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
                     this.score = score + 1;
 
                     if (brick.hit(1)) {
-                        destroyedBricks.add(brick);
+                      destroyedBricks.add(brick);
+                      notifyDestroyed();
+                    } else {
+                      notifyDestroyed();
                     }
                 }
 
@@ -192,6 +200,8 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
 
             // Nudge position away so that ball is not overlapping any more
             collisionEngine.moveBallSlightlySoNoLongerCollides(ball, playerBat.getAABB(), bounceAxis);
+
+            notifyBatTouchBall();
         }
     }
 
@@ -222,4 +232,24 @@ public class Level implements GameDrawable, GameEntity, TouchEventHandler {
     public int getScore() {
         return score;
     }
+
+    @Override
+    public void registerCollisionListener(CollisionListener listener) {
+        collisionListeners.add(listener);
+    }
+
+    @Override
+    public void notifyDamaged() {
+      collisionListeners.forEach(CollisionListener::onBlockDamaged);
+    }
+
+    @Override
+    public void notifyDestroyed() {
+      collisionListeners.forEach(CollisionListener::onBlockDestroyed);
+    }
+
+  @Override
+  public void notifyBatTouchBall() {
+    collisionListeners.forEach(CollisionListener::onBatTouchBall);
+  }
 }

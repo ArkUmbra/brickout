@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Vibrator;
 import android.view.MotionEvent;
 
+import com.arkumbra.brickout.engine.collision.CollisionListener;
 import com.arkumbra.brickout.engine.entity.GameDrawable;
 import com.arkumbra.brickout.engine.level.Level;
 import com.arkumbra.brickout.engine.entity.GameEntity;
@@ -24,7 +26,7 @@ import java.util.List;
  * Created by lukegardener on 2017/07/28.
  */
 
-public class GameEngineImpl implements GameEngine {
+public class GameEngineImpl implements GameEngine, CollisionListener {
 
     private static final String LOG_TAG = "GameEngine";
     private static final int BACKGROUND_COLOR = Color.BLACK;
@@ -54,10 +56,14 @@ public class GameEngineImpl implements GameEngine {
     private Level currentLevel;
     private Context context;
 
+    private Vibrator vibrator;
+
     public GameEngineImpl(Context context) {
         this.context = context;
 
         FontUtils.initialise(context);
+
+        vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     /**
@@ -193,6 +199,7 @@ public class GameEngineImpl implements GameEngine {
                                 this.surfaceDimensions
         );
 
+        level.registerCollisionListener(this);
         this.currentLevel = level;
     }
 
@@ -247,4 +254,19 @@ public class GameEngineImpl implements GameEngine {
     public Context getContext() {
         return context;
     }
+
+    @Override
+    public void onBlockDamaged() {
+      vibrator.vibrate(20);
+    }
+
+    @Override
+    public void onBlockDestroyed() {
+      vibrator.vibrate(70);
+    }
+
+  @Override
+  public void onBatTouchBall() {
+    vibrator.vibrate(70);
+  }
 }

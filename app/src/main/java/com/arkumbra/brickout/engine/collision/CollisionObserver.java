@@ -5,4 +5,10 @@ package com.arkumbra.brickout.engine.collision;
  */
 
 public interface CollisionObserver {
+
+  public void registerCollisionListener(CollisionListener listener);
+  public void notifyDamaged();
+  public void notifyDestroyed();
+  public void notifyBatTouchBall();
+
 }

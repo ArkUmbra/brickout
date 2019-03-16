@@ -5,4 +5,9 @@ package com.arkumbra.brickout.engine.collision;
  */
 
 public interface CollisionListener {
+
+  public void onBlockDamaged();
+  public void onBlockDestroyed();
+  public void onBatTouchBall();
+
 }
